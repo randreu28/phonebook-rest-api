@@ -1,8 +1,18 @@
 import express from "express";
 import type { Request, Response } from "express";
 import z from "zod";
+import morgan from "morgan";
 
 const app = express();
+
+morgan.token("body", (req: Request, _res: Response) => {
+  return JSON.stringify(req.body);
+});
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :body")
+);
+
+app.use(morgan("tiny"));
 app.use(express.json());
 const port = process.env.PORT || 3000;
 
