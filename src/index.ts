@@ -2,6 +2,7 @@ import express from "express";
 import type { Request, Response } from "express";
 import z from "zod";
 import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
 
@@ -14,7 +15,9 @@ app.use(
 
 app.use(morgan("tiny"));
 app.use(express.json());
-const port = process.env.PORT || 3000;
+app.use(cors());
+
+const port = process.env.PORT || 3001;
 
 const persons = [
   {
