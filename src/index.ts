@@ -1,16 +1,16 @@
 import cors from "cors";
 import dotenv from "dotenv";
-import type { Request, Response } from "express";
+import type { Request } from "express";
 import express from "express";
 import morgan from "morgan";
-import handlePersons from "./persons";
-import handleGetInfo from "./info";
 import { dbConnect } from "./db";
 import { errorHandler } from "./errorHandler";
+import handleGetInfo from "./info";
+import handlePersons from "./persons";
 
 const app = express();
 
-morgan.token("body", (req: Request, _res: Response) => {
+morgan.token("body", (req: Request) => {
   return JSON.stringify(req.body);
 });
 dotenv.config();

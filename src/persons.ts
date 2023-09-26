@@ -55,7 +55,7 @@ export function handleDeletePerson(app: express.Express) {
       .then(() => {
         res.status(200).send({ message: "Person deleted successfully" });
       })
-      .catch((err: any) => {
+      .catch((err: Error) => {
         res.status(500).send(err);
       });
   });
@@ -68,7 +68,7 @@ export function handleGetPersonById(app: express.Express) {
       .then((person) => {
         res.send(person);
       })
-      .catch((err: any) => {
+      .catch((err: Error) => {
         res.status(500).send(err);
       });
   });
