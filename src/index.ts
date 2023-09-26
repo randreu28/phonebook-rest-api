@@ -1,29 +1,32 @@
-import express from "express";
-import type { Request, Response } from "express";
-import z from "zod";
-import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
-
-dotenv.config();
+import type { Request, Response } from "express";
+import express from "express";
+import morgan from "morgan";
+import handlePersons from "./persons";
+import handleGetInfo from "./info";
 
 const app = express();
+const port = process.env.PORT || 3001;
 
 morgan.token("body", (req: Request, _res: Response) => {
   return JSON.stringify(req.body);
 });
+dotenv.config();
+
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
-
 app.use(morgan("tiny"));
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(cors());
 
-const port = process.env.PORT || 3001;
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
 
-const persons = [
+export const persons = [
   {
     id: 1,
     name: "Arto Hellas",
@@ -46,62 +49,5 @@ const persons = [
   },
 ];
 
-app.get("/api/persons", (_req: Request, res: Response) => {
-  res.send(persons);
-});
-
-app.get("/info", (_req: Request, res: Response) => {
-  res.send(`
-  <p>Phone book has info for ${persons.length}<p/>
-  <p>${new Date().toString()}</p>
-  `);
-});
-
-app.get("/api/persons/:id", (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  res.send(persons.find((person) => person.id === id));
-});
-
-app.delete("/api/persons/:id", (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  res.send(persons.filter((person) => person.id !== id));
-});
-
-app.post("/api/persons", (req: Request, res: Response) => {
-  const data = req.body;
-
-  console.log(data);
-
-  const personSchema = z.object({
-    name: z.string(),
-    number: z.string(),
-  });
-
-  const { success } = personSchema.safeParse(data);
-
-  if (!success) {
-    res.status(400).json({ error: "invalid body" }).end();
-    return;
-  }
-
-  const parsedData = data as z.infer<typeof personSchema>;
-
-  const isNameRegistered = persons.some(
-    (person) => person.name === parsedData.name
-  );
-
-  if (isNameRegistered) {
-    res.status(400).json({ error: "Name must be unique" }).end();
-    return;
-  }
-
-  persons.push({ ...parsedData, id: Math.floor(Math.random() * 999999) });
-
-  res.send(persons);
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+handleGetInfo(app);
+handlePersons(app);
