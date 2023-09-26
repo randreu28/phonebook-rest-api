@@ -5,9 +5,9 @@ import express from "express";
 import morgan from "morgan";
 import handlePersons from "./persons";
 import handleGetInfo from "./info";
+import { dbConnect } from "./db";
 
 const app = express();
-const port = process.env.PORT || 3001;
 
 morgan.token("body", (req: Request, _res: Response) => {
   return JSON.stringify(req.body);
@@ -21,10 +21,6 @@ app.use(morgan("tiny"));
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(cors());
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
 
 export const persons = [
   {
@@ -49,5 +45,6 @@ export const persons = [
   },
 ];
 
+dbConnect(app);
 handleGetInfo(app);
 handlePersons(app);
