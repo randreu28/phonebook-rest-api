@@ -3,6 +3,9 @@ import type { Request, Response } from "express";
 import z from "zod";
 import morgan from "morgan";
 import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
