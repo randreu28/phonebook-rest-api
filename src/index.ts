@@ -6,6 +6,7 @@ import morgan from "morgan";
 import handlePersons from "./persons";
 import handleGetInfo from "./info";
 import { dbConnect } from "./db";
+import { errorHandler } from "./errorHandler";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(morgan("tiny"));
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(cors());
+app.use(errorHandler);
 
 dbConnect(app);
 handleGetInfo(app);
