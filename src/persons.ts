@@ -1,7 +1,7 @@
 import express from "express";
 import type { Request, Response } from "express";
-import { persons } from ".";
 import { z } from "zod";
+import { Person } from "./db";
 
 export default function handlePersons(app: express.Express) {
   handleGetPersons(app);
@@ -12,14 +12,15 @@ export default function handlePersons(app: express.Express) {
 
 export function handleGetPersons(app: express.Express) {
   app.get("/api/persons", (_req: Request, res: Response) => {
-    res.send(persons);
+    Person.find({}).then((persons) => {
+      res.send(persons);
+    });
   });
 }
 
 export function handlePostPerson(app: express.Express) {
   app.post("/api/persons", (req: Request, res: Response) => {
     const data = req.body;
-    console.log(data);
     const personSchema = z.object({
       name: z.string(),
       number: z.string(),
@@ -30,28 +31,45 @@ export function handlePostPerson(app: express.Express) {
       return;
     }
     const parsedData = data as z.infer<typeof personSchema>;
-    const isNameRegistered = persons.some(
-      (person) => person.name === parsedData.name
-    );
-    if (isNameRegistered) {
-      res.status(400).json({ error: "Name must be unique" }).end();
-      return;
-    }
-    persons.push({ ...parsedData, id: Math.floor(Math.random() * 999999) });
-    res.send(persons);
+
+    Person.findOne({ name: parsedData.name }).then((person) => {
+      if (person !== null) {
+        res.status(400).json({ error: "Name must be unique" }).end();
+        return;
+      }
+      const newPerson = new Person({
+        ...parsedData,
+        id: Math.floor(Math.random() * 999999),
+      });
+      newPerson.save().then((person) => {
+        res.send(person);
+      });
+    });
   });
 }
 
 export function handleDeletePerson(app: express.Express) {
   app.delete("/api/persons/:id", (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    res.send(persons.filter((person) => person.id !== id));
+    Person.findOneAndRemove({ id: id })
+      .then(() => {
+        res.status(200).send({ message: "Person deleted successfully" });
+      })
+      .catch((err: any) => {
+        res.status(500).send(err);
+      });
   });
 }
 
 export function handleGetPersonById(app: express.Express) {
   app.get("/api/persons/:id", (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    res.send(persons.find((person) => person.id === id));
+    Person.findOne({ id: id })
+      .then((person) => {
+        res.send(person);
+      })
+      .catch((err: any) => {
+        res.status(500).send(err);
+      });
   });
 }

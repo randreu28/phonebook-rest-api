@@ -27,3 +27,12 @@ export function dbConnect(app: express.Express) {
     process.exit(0);
   }
 }
+
+export const Person = mongoose.model(
+  "persons",
+  new mongoose.Schema({
+    id: Number,
+    name: String,
+    number: String,
+  })
+);
